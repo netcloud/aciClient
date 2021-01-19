@@ -19,7 +19,7 @@ Please follow the procedure below:
       
    Major = Breaking Changes 
    
-   Minor = Backwards Compatible / New Features Patch = Backwards Compatible / Bug Fixes
+   Minor = Backwards Compatible / New Features / Bug Fixes
   
 2. Create Pull Request
 
