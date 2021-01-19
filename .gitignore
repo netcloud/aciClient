@@ -1,0 +1,13 @@
+.DS_Store
+.idea
+Thumbs.db
+*.pyc
+.idea/**
+**/.DS_Store
+**/~$*
+**/*.pyc
+**/Thumbs.db
+**/leaf-*.html
+.venv
+venv
+.pytest_cache
