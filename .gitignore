@@ -10,4 +10,6 @@ Thumbs.db
 **/leaf-*.html
 .venv
 venv
+dist
+*.egg-info/
 .pytest_cache
