@@ -2,6 +2,10 @@
 
 A python wrapper to the Cisco ACI REST-API.
 
+## Python Version
+
+We support Python 3.6 and up. Python 2 is not supported and there is no plan to add support for it.
+
 ## Installation
 ``pip install aciclient``
 
