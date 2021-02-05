@@ -17,4 +17,5 @@ setup(name='aciClient',
       install_requires=['requests>=2.25.0 , <3', 'pyOpenSSL>=19.1.0, <20'],
       long_description=long_description,
       long_description_content_type='text/markdown',
+      python_requires=">=3.6",
       zip_safe=False)
