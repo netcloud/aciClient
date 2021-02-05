@@ -6,13 +6,10 @@
 """AciClient Testing
 
 """
-# <editor-fold desc="Imports">
 from requests import RequestException
 
 from aciClient.aci import ACI
 import pytest
-
-# </editor-fold>
 
 __BASE_URL = 'testing-apic.ncdev.ch'
 

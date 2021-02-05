@@ -6,6 +6,10 @@ package:
 pypi:
 	make clean
 	python setup.py sdist; twine upload dist/* --skip-existing
+.PHONY: test
+test:
+	python -m pytest
+	python -m flake8 .
 .PHONY: clean
 clean:
 	find ./* -name '*.pyc' -exec rm {} \;
