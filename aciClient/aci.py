@@ -46,7 +46,7 @@ class ACI:
         self.__logger.debug('login called')
 
         self.session = requests.Session()
-        self.__logger.info('Session Object Created')
+        self.__logger.debug('Session Object Created')
 
         # create credentials structure
         userPass = json.dumps({'aaaUser': {'attributes': {'name': self.apicUser, 'pwd': self.apicPassword}}})
@@ -64,7 +64,7 @@ class ACI:
         response.raise_for_status()
 
         self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
-        self.__logger.info('Successful get Token from APIC')
+        self.__logger.debug('Successful get Token from APIC')
         return True
 
     # ==============================================================================
@@ -85,7 +85,7 @@ class ACI:
         response.raise_for_status()
 
         self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
-        self.__logger.info('Successful renewed the Token')
+        self.__logger.debug('Successful renewed the Token')
         return True
 
     # ==============================================================================
@@ -108,10 +108,10 @@ class ACI:
 
         if response.ok:
             responseJson = response.json()
-            self.__logger.info(f'Successful get Data from APIC: {responseJson}')
+            self.__logger.debug(f'Successful get Data from APIC: {responseJson}')
             if subscription:
                 subscription_id = responseJson['subscriptionId']
-                self.__logger.info(f'Returning Subscription Id: {subscription_id}')
+                self.__logger.debug(f'Returning Subscription Id: {subscription_id}')
                 return subscription_id
             return responseJson['imdata']
 
@@ -120,7 +120,7 @@ class ACI:
             self.__logger.error(f'Error 400 during get occured: {resp_text}')
             if resp_text == 'Unable to process the query, result dataset is too big':
                 # Dataset was too big, we try to grab all the data with pagination
-                self.__logger.info(f'Trying with Pagination, uri: {uri}')
+                self.__logger.debug(f'Trying with Pagination, uri: {uri}')
                 return self.getJsonPaged(uri)
             return resp_text
         else:
@@ -148,7 +148,7 @@ class ACI:
 
             if response.ok:
                 responseJson = response.json()
-                self.__logger.info(f'Successful get Data from APIC: {responseJson}')
+                self.__logger.debug(f'Successful get Data from APIC: {responseJson}')
                 if responseJson['imdata']:
                     return_data.extend(responseJson['imdata'])
                 else:
@@ -170,7 +170,7 @@ class ACI:
         self.__logger.debug(f'Post Json called data: {jsonData}')
         response = self.session.post(self.baseUrl + url, verify=False, data=json.dumps(jsonData, sort_keys=True))
         if response.status_code == 200:
-            self.__logger.info(f'Successful Posted Data to APIC: {response.json()}')
+            self.__logger.debug(f'Successful Posted Data to APIC: {response.json()}')
             return response.status_code
         elif response.status_code == 400:
             resp_text = '400: ' + response.json()['imdata'][0]['error']['attributes']['text']
@@ -220,7 +220,7 @@ class ACI:
 
         response = self.postJson(json_payload)
         if response == 200:
-            self.__logger.info(f'snapshot created and triggered')
+            self.__logger.debug(f'snapshot created and triggered')
             return True
         else:
             self.__logger.error(f'snapshot creation not succesfull: {response.text}')
