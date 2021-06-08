@@ -192,3 +192,36 @@ class ACI:
         response.raise_for_status()
 
         return response.status_code
+
+    # ==============================================================================
+    # snapshot
+    # ==============================================================================
+    def snapshot(self, description="snapshot") -> bool:
+        self.__logger.debug(f'snapshot called {description}')
+
+        json_payload = [
+            {
+            "configExportP": {
+                "attributes": {
+                    "adminSt": "triggered",
+                    "descr": f"by aciClient - {description}",
+                    "dn": "uni/fabric/configexp-netcloud-aciclient",
+                    "format": "json",
+                    "includeSecureFields": "yes",
+                    "maxSnapshotCount": "global-limit",
+                    "name": "netcloud-aciclient",
+                    "nameAlias": "",
+                    "snapshot": "yes",
+                    "targetDn": ""
+                    }
+                }
+            }
+        ]
+
+        response = self.postJson(json_payload)
+        if response == 200:
+            self.__logger.info(f'snapshot created and triggered')
+            return True
+        else:
+            self.__logger.error(f'snapshot creation not succesfull: {response.text}')
+            return False

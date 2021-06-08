@@ -88,6 +88,11 @@ aciclient.postJson(config)
 aciclient.deleteMo('uni/tn-XYZ')
 ```
 
+### create snapshot
+```python
+aci.snapshot('test')
+```
+
 ## Testing
 
 ```
@@ -104,6 +109,7 @@ of conduct, and the process for submitting pull requests to this project.
 * **Marcel Zehnder** - *Initial work*
 * **Andreas Graber** - *Migration to open source*
 * **Richard Strnad** - *Paginagtion for large requests, various small stuff*
+* **Dario Kaelin** - *Added snapshot creation*
 
 ## License
 
