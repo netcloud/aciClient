@@ -38,10 +38,18 @@ class ACI:
         self.__logger.debug(f'BaseUrl set to: {self.baseUrl}')
 
         self.refresh_auto = refresh
+        self.refresh_next = None
         self.refresh_thread = None
         self.refresh_offset = 30
         self.session = None
         self.token = None
+
+    def __refresh_session_timer(self, response):
+        self.__logger.debug(f'refreshing the token {self.refresh_offset}s before it expires')
+        self.refresh_next = int(response.json()['imdata'][0]['aaaLogin']['attributes']['refreshTimeoutSeconds'])
+        self.refresh_thread = threading.Timer(self.refresh_next - self.refresh_offset, self.renewCookie)
+        self.__logger.debug(f'starting thread to refresh token in {self.refresh_next - self.refresh_offset}s')
+        self.refresh_thread.start()
 
     # ==============================================================================
     # login
@@ -69,14 +77,10 @@ class ACI:
 
         self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
         self.__logger.debug('Successful get Token from APIC')
-        
+
         if self.refresh_auto:
-            self.__logger.debug(f'refreshing the token {self.refresh_offset}s before it expires')
-            self.refresh_next = int(response.json()['imdata'][0]['aaaLogin']['attributes']['refreshTimeoutSeconds'])
-            self.refresh_thread = threading.Timer(self.refresh_next-self.refresh_offset, self.renewCookie)
-            self.__logger.debug(f'starting thread to refresh token in {self.refresh_next-self.refresh_offset}s')
-            self.refresh_thread.start()
-        return True  
+            self.__refresh_session_timer(response=response)
+        return True
 
     # ==============================================================================
     # logout
@@ -90,14 +94,13 @@ class ACI:
                 self.refresh_thread.cancel()
         self.postJson(jsonData={'aaaUser': {'attributes': {'name': self.apicUser}}}, url='aaaLogout.json')
         self.__logger.debug('Logout from APIC sucessfull')
-    
+
     # ==============================================================================
     # renew cookie auto (aaaRefresh)
     # ==============================================================================
     def renewCookie_auto(self):
         self.__logger.debug('renewCookie called')
         response = self.session.get(self.baseUrl + 'aaaRefresh.json', verify=False)
-          
 
     # ==============================================================================
     # renew cookie (aaaRefresh)
@@ -108,10 +111,7 @@ class ACI:
 
         if response.status_code == 200:
             if self.refresh_auto:
-                self.refresh_next = int(response.json()['imdata'][0]['aaaLogin']['attributes']['refreshTimeoutSeconds'])
-                self.refresh_thread = threading.Timer(self.refresh_next-self.refresh_offset, self.renewCookie)
-                self.__logger.debug(f'refresh_auto on, next renew in {self.refresh_next-self.refresh_offset}')
-                self.refresh_thread.start()
+                self.__refresh_session_timer(response=response)
             self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
             self.__logger.debug('Successfuly renewed the token')
         else:
@@ -233,18 +233,18 @@ class ACI:
 
         json_payload = [
             {
-            "configExportP": {
-                "attributes": {
-                    "adminSt": "triggered",
-                    "descr": f"by aciClient - {description}",
-                    "dn": "uni/fabric/configexp-netcloud-aciclient",
-                    "format": "json",
-                    "includeSecureFields": "yes",
-                    "maxSnapshotCount": "global-limit",
-                    "name": "netcloud-aciclient",
-                    "nameAlias": "",
-                    "snapshot": "yes",
-                    "targetDn": ""
+                "configExportP": {
+                    "attributes": {
+                        "adminSt": "triggered",
+                        "descr": f"by aciClient - {description}",
+                        "dn": "uni/fabric/configexp-aciclient",
+                        "format": "json",
+                        "includeSecureFields": "yes",
+                        "maxSnapshotCount": "global-limit",
+                        "name": "aciclient",
+                        "nameAlias": "",
+                        "snapshot": "yes",
+                        "targetDn": ""
                     }
                 }
             }
@@ -252,8 +252,8 @@ class ACI:
 
         response = self.postJson(json_payload)
         if response == 200:
-            self.__logger.debug(f'snapshot created and triggered')
+            self.__logger.debug('snapshot created and triggered')
             return True
         else:
-            self.__logger.error(f'snapshot creation not succesfull: {response.text}')
+            self.__logger.error(f'snapshot creation not succesfull: {response}')
             return False
