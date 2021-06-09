@@ -66,7 +66,7 @@ class ACI:
         self.__logger.info(f'Login to apic {self.baseUrl}')
         response = self.session.post(self.baseUrl + 'aaaLogin.json', data=userPass, verify=False, timeout=5)
 
-        # Don't rise an exception for 401
+        # Don't raise an exception for 401
         if response.status_code == 401:
             self.__logger.error(f'Login not possible due to Error: {response.text}')
             self.session = False
@@ -96,13 +96,6 @@ class ACI:
         self.__logger.debug('Logout from APIC sucessfull')
 
     # ==============================================================================
-    # renew cookie auto (aaaRefresh)
-    # ==============================================================================
-    def renewCookie_auto(self):
-        self.__logger.debug('renewCookie called')
-        response = self.session.get(self.baseUrl + 'aaaRefresh.json', verify=False)
-
-    # ==============================================================================
     # renew cookie (aaaRefresh)
     # ==============================================================================
     def renewCookie(self) -> bool:
@@ -115,8 +108,10 @@ class ACI:
             self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
             self.__logger.debug('Successfuly renewed the token')
         else:
-            response.raise_for_status()
+            self.token = False
+            self.refresh_auto = False
             self.__logger.error(f'Could not renew token. {response.text}')
+            response.raise_for_status()
             return False
         return True
 

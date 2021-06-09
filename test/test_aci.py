@@ -10,6 +10,7 @@ from requests import RequestException
 
 from aciClient.aci import ACI
 import pytest
+import time
 
 __BASE_URL = 'testing-apic.ncdev.ch'
 
@@ -46,6 +47,40 @@ def test_login_404_exception(requests_mock):
     with pytest.raises(RequestException):
         resp = aci.login()
 
+def test_login_refresh_ok(requests_mock):
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaLogin.json', json={'imdata': [
+        {'aaaLogin': {'attributes': {'refreshTimeoutSeconds': '31', 'token':'tokenxyz'}}}
+    ]})
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaRefresh.json', json={
+        'imdata': [
+            {
+            'aaaLogin': {
+                'attributes': {
+                    'refreshTimeoutSeconds': '300',
+                    'token':'tokenabc'
+                    }
+                }
+            }
+        ]})
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaLogout.json', json={'imdata': []}, status_code=200)
+    aci = ACI(apicIp=__BASE_URL, apicUser='admin', apicPasword='unkown', refresh=True)
+    aci.login()
+    token = aci.getToken()
+    time.sleep(2)
+    aci.logout()
+    assert token != aci.getToken()
+
+def test_login_refresh_nok(requests_mock):
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaLogin.json', json={'imdata': [
+        {'aaaLogin': {'attributes': {'refreshTimeoutSeconds': '31', 'token':'tokenxyz'}}}
+    ]})
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaRefresh.json', json={
+        'imdata': []}, status_code=403)
+    aci = ACI(apicIp=__BASE_URL, apicUser='admin', apicPasword='unkown', refresh=True)
+    aci.login()
+    time.sleep(3)
+    token = aci.getToken()
+    assert not token
 
 def test_renew_cookie_ok(requests_mock):
     requests_mock.post(f'https://{__BASE_URL}/api/aaaLogin.json', json={'imdata': [
