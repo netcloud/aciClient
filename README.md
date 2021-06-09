@@ -28,7 +28,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password)
+aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=True)
 try:
     aciclient.login()
     

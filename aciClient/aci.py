@@ -10,6 +10,7 @@ AciClient for doing Username/Password based RestCalls to the APIC
 import logging
 import json
 import requests
+import threading
 
 # The modules are named different in python2/python3...
 try:
@@ -27,7 +28,7 @@ class ACI:
     # ==============================================================================
     # constructor
     # ==============================================================================
-    def __init__(self, apicIp, apicUser, apicPasword):
+    def __init__(self, apicIp, apicUser, apicPasword, refresh=False):
         self.__logger.debug('Constructor called')
         self.apicIp = apicIp
         self.apicUser = apicUser
@@ -36,6 +37,9 @@ class ACI:
         self.baseUrl = 'https://' + self.apicIp + '/api/'
         self.__logger.debug(f'BaseUrl set to: {self.baseUrl}')
 
+        self.refresh_auto = refresh
+        self.refresh_thread = None
+        self.refresh_offset = 30
         self.session = None
         self.token = None
 
@@ -65,14 +69,35 @@ class ACI:
 
         self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
         self.__logger.debug('Successful get Token from APIC')
-        return True
+        
+        if self.refresh_auto:
+            self.__logger.debug(f'refreshing the token {self.refresh_offset}s before it expires')
+            self.refresh_next = int(response.json()['imdata'][0]['aaaLogin']['attributes']['refreshTimeoutSeconds'])
+            self.refresh_thread = threading.Timer(self.refresh_next-self.refresh_offset, self.renewCookie)
+            self.__logger.debug(f'starting thread to refresh token in {self.refresh_next-self.refresh_offset}s')
+            self.refresh_thread.start()
+        return True  
 
     # ==============================================================================
     # logout
     # ==============================================================================
     def logout(self):
-        self.__logger.debug('Logout from APIC...')
+        self.__logger.debug('logout called')
+        self.refresh_auto = False
+        if self.refresh_thread is not None:
+            if self.refresh_thread.is_alive():
+                self.__logger.debug('Stoping refresh_auto thread')
+                self.refresh_thread.cancel()
         self.postJson(jsonData={'aaaUser': {'attributes': {'name': self.apicUser}}}, url='aaaLogout.json')
+        self.__logger.debug('Logout from APIC sucessfull')
+    
+    # ==============================================================================
+    # renew cookie auto (aaaRefresh)
+    # ==============================================================================
+    def renewCookie_auto(self):
+        self.__logger.debug('renewCookie called')
+        response = self.session.get(self.baseUrl + 'aaaRefresh.json', verify=False)
+          
 
     # ==============================================================================
     # renew cookie (aaaRefresh)
@@ -81,11 +106,18 @@ class ACI:
         self.__logger.debug('Renew Cookie called')
         response = self.session.post(self.baseUrl + 'aaaRefresh.json', verify=False)
 
-        # Raise Exception for an error 4xx and 5xx
-        response.raise_for_status()
-
-        self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
-        self.__logger.debug('Successful renewed the Token')
+        if response.status_code == 200:
+            if self.refresh_auto:
+                self.refresh_next = int(response.json()['imdata'][0]['aaaLogin']['attributes']['refreshTimeoutSeconds'])
+                self.refresh_thread = threading.Timer(self.refresh_next-self.refresh_offset, self.renewCookie)
+                self.__logger.debug(f'refresh_auto on, next renew in {self.refresh_next-self.refresh_offset}')
+                self.refresh_thread.start()
+            self.token = response.json()['imdata'][0]['aaaLogin']['attributes']['token']
+            self.__logger.debug('Successfuly renewed the token')
+        else:
+            response.raise_for_status()
+            self.__logger.error(f'Could not renew token. {response.text}')
+            return False
         return True
 
     # ==============================================================================
