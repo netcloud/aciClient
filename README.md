@@ -7,7 +7,7 @@ A python wrapper to the Cisco ACI REST-API.
 We support Python 3.6 and up. Python 2 is not supported and there is no plan to add support for it.
 
 ## Installation
-``pip install aciclient``
+``pip install aciClient``
 
 ## Installation for Developing
 ```
@@ -28,7 +28,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=True)
+aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=False)
 try:
     aciclient.login()
     
@@ -41,6 +41,11 @@ except Exception as e:
     logger.exception("Stack Trace")
     
 ```
+For automatic authentication token refresh you can set refresh to True
+```python
+aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=True)    
+```
+
 
 ### Certificate/signature
 ```python
