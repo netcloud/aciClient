@@ -55,7 +55,7 @@ class ACICert:
         # Raise Exception if http Error occurred
         r.raise_for_status()
 
-        self.__logger.info(f'Successful get Data from APIC: {r.json()}')
+        self.__logger.debug(f'Successful get Data from APIC: {r.json()}')
         return r.json()['imdata']
 
     # ==============================================================================
@@ -73,7 +73,7 @@ class ACICert:
         r.raise_for_status()
 
         if r.status_code == 200:
-            self.__logger.info(f'Successful Posted Data to APIC: {r.json()}')
+            self.__logger.debug(f'Successful Posted Data to APIC: {r.json()}')
             return r.status_code
         else:
             self.__logger.error(f'Error during get occured: {r.json()}')
