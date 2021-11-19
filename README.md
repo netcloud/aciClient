@@ -1,5 +1,7 @@
 # aciClient
 
+![PyPi](https://img.shields.io/pypi/v/aciClient)
+
 A python wrapper to the Cisco ACI REST-API.
 
 ## Python Version
