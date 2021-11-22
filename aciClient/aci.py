@@ -223,7 +223,7 @@ class ACI:
     # ==============================================================================
     # snapshot
     # ==============================================================================
-    def snapshot(self, description="snapshot") -> bool:
+    def snapshot(self, description="snapshot", target_dn="") -> bool:
         self.__logger.debug(f'snapshot called {description}')
 
         json_payload = [
@@ -239,7 +239,7 @@ class ACI:
                         "name": "aciclient",
                         "nameAlias": "",
                         "snapshot": "yes",
-                        "targetDn": ""
+                        "targetDn": f"{target_dn}"
                     }
                 }
             }
