@@ -255,3 +255,28 @@ def test_snapshot_nok(requests_mock):
     aci.login()
     resp = aci.snapshot(description='unit_test')
     assert not resp
+
+def test_snapshot_tenant_ok(requests_mock):
+    requests_mock.post(f'https://{__BASE_URL}/api/mo.json', json={"totalCount": "0", "imdata": []})
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaLogin.json', json={'imdata': [
+        {'aaaLogin': {'attributes': {'token': 'tokenxyz'}}}
+    ]})
+
+    aci = ACI(apicIp=__BASE_URL, apicUser='admin', apicPasword='unkown')
+    aci.login()
+    resp = aci.snapshot(description='unit_test', target_dn='/uni/tn-test')
+    assert resp
+
+
+def test_snapshot_tenant_nok(requests_mock):
+    requests_mock.post(f'https://{__BASE_URL}/api/mo.json',
+                       json={"totalCount": "0", "imdata": [{"error": {"attributes": {"text": "Error UnitTest"}}}]},
+                       status_code=400)
+    requests_mock.post(f'https://{__BASE_URL}/api/aaaLogin.json', json={'imdata': [
+        {'aaaLogin': {'attributes': {'token': 'tokenxyz'}}}
+    ]})
+
+    aci = ACI(apicIp=__BASE_URL, apicUser='admin', apicPasword='unkown')
+    aci.login()
+    resp = aci.snapshot(description='unit_test', target_dn='/uni/tn-test')
+    assert not resp
