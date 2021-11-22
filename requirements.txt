@@ -1,4 +1,4 @@
-pyOpenSSL>=21.1.0
+pyOpenSSL>=21.0.0, <22
 requests>=2.26.0 , <3
 requests-mock
 pytest
