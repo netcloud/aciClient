@@ -41,9 +41,10 @@ try:
     aciclient.logout()
 except Exception as e:
     logger.exception("Stack Trace")
-    
 ```
-For automatic authentication token refresh you can set refresh to True
+
+For automatic authentication token refresh you can set variable ```refresh``` to True
+
 ```python
 aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=True)    
 ```
@@ -96,8 +97,9 @@ aciclient.deleteMo('uni/tn-XYZ')
 ```
 
 ### create snapshot
+You can specify a tenant in variable ```target_dn``` or not provide any to do a fabric-wide snapshot.
 ```python
-aci.snapshot('test')
+aci.snapshot(description='test', target_dn='/uni/tn-test')
 ```
 
 ## Testing
