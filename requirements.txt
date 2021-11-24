@@ -1,5 +1,5 @@
-pyOpenSSL>=19.1.0, <20
-requests>=2.25.0 , <3
+pyOpenSSL>=21.0.0, <22
+requests>=2.26.0 , <3
 requests-mock
 pytest
 flake8
