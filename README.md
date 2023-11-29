@@ -30,7 +30,12 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=False)
+proxies = {
+    'http': 'socks5://127.0.0.1:1080',
+    'https': 'socks5://127.0.0.1:1080'
+}
+
+aciclient = aciClient.ACI(apic_hostname, apic_username, apic_password, refresh=False, proxies=proxies)
 try:
     aciclient.login()
     

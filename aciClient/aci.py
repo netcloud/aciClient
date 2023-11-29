@@ -28,11 +28,12 @@ class ACI:
     # ==============================================================================
     # constructor
     # ==============================================================================
-    def __init__(self, apicIp, apicUser, apicPasword, refresh=False):
+    def __init__(self, apicIp, apicUser, apicPasword, refresh=False, proxies=None):
         self.__logger.debug('Constructor called')
         self.apicIp = apicIp
         self.apicUser = apicUser
         self.apicPassword = apicPasword
+        self.proxies = proxies
 
         self.baseUrl = 'https://' + self.apicIp + '/api/'
         self.__logger.debug(f'BaseUrl set to: {self.baseUrl}')
@@ -59,6 +60,9 @@ class ACI:
 
         self.session = requests.Session()
         self.__logger.debug('Session Object Created')
+
+        if self.proxies is not None:
+            self.session.proxies = self.proxies
 
         # create credentials structure
         userPass = json.dumps({'aaaUser': {'attributes': {'name': self.apicUser, 'pwd': self.apicPassword}}})
