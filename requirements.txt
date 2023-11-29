@@ -1,5 +1,6 @@
 pyOpenSSL>=23.0.0, <24
-requests>=2.26.0 , <3
+requests[socks]>=2.26.0 , <3
 requests-mock
 pytest
 flake8
+pysocks==1.7.1
