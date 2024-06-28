@@ -102,6 +102,26 @@ You can specify a tenant in variable ```target_dn``` or not provide any to do a 
 aci.snapshot(description='test', target_dn='/uni/tn-test')
 ```
 
+### subscribe
+```python
+subscription_dn = "node/class/faultInst.json"
+timeout = 60 # Optional. Default value in ACI
+query_parameters = ["order-by=faultInst.lastTransition|asc"] # Optional
+
+response = aciclient.subscribe(
+            subscription_dn=subscription_dn,
+            timeout=timeout,
+            query_parameters=query_parameters)
+subscription_id = response.json()["subscriptionId"]
+```
+
+### refresh subscription
+```python
+subscription_id = 700000
+aciclient.aci.subscription_refresh(subscription_id=subscription_id)
+```
+
+
 ## Testing
 
 ```
