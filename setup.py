@@ -7,10 +7,10 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='aciClient',
-      version='1.5',
+      version='1.6',
       description='aci communication helper class',
       url='http://www.netcloud.ch',
-      author='mze',
+      author='Netcloud AG',
       author_email='nc_dev@netcloud.ch',
       license='MIT',
       packages=['aciClient'],
