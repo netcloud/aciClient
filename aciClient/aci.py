@@ -12,6 +12,9 @@ import json
 import requests
 import threading
 
+import urllib3
+from requests.adapters import HTTPAdapter
+
 # The modules are named different in python2/python3...
 try:
     from urlparse import urlparse, urlunparse, parse_qsl
@@ -43,6 +46,9 @@ class ACI:
         self.refresh_offset = 30
         self.session = None
         self.token = None
+        # See https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html
+        self.total_retry_attempts = 5
+        self.retry_backoff_factor = 10  # in seconds; multiplied by previous attempts.
 
     def __refresh_session_timer(self, response):
         self.__logger.debug(f'refreshing the token {self.refresh_offset}s before it expires')
@@ -57,7 +63,16 @@ class ACI:
     def login(self) -> bool:
         self.__logger.debug('login called')
 
+        retry_strategy = urllib3.Retry(
+            total=self.total_retry_attempts,
+            backoff_factor=self.retry_backoff_factor,
+            status_forcelist=[429, 500, 502, 503, 504],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+
         self.session = requests.Session()
+        self.session.mount('http://', adapter)
+        self.session.mount('https://', adapter)
         self.__logger.debug('Session Object Created')
 
         # create credentials structure
