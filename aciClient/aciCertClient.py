@@ -16,6 +16,15 @@ import base64
 import requests
 import json
 
+# The modules are named different in python2/python3...
+try:
+    from urlparse import urlparse, urlunparse, parse_qsl
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
+
+requests.packages.urllib3.disable_warnings()
+
 
 class ACICert:
     __logger = logging.getLogger(__name__)
@@ -58,6 +67,42 @@ class ACICert:
         self.__logger.debug(f'Successful get Data from APIC: {r.json()}')
         return r.json()['imdata']
 
+    # ==============================================================================
+    # getJson with Pagination
+    # ==============================================================================
+    def getJsonPaged(self, uri) -> {}:
+        url = self.baseUrl + uri
+        self.__logger.debug(f'Get Json Pagination called url: {url}')
+        parsed_url = urlparse(url)
+        parsed_query = parse_qsl(parsed_url.query)
+
+        return_data = []
+        page = 0
+
+        while True:
+            if page == 0:
+                parsed_query.extend([('page-size', '50000'), ('page', page)])
+            else:
+                parsed_query[-1] = ('page', page)
+
+            page += 1
+            url_to_call = urlunparse((parsed_url[0], parsed_url[1], parsed_url[2], parsed_url[3],
+                                      urlencode(parsed_query), parsed_url[5]))
+            content = f'GET{parsed_url[2]}?{urlencode(parsed_query)}'
+            cookies = self.packCookies(content)
+            r = requests.get(url_to_call, cookies=cookies, verify=False)
+
+            # Raise Exception if http Error occurred
+            r.raise_for_status()
+
+            if r.ok:
+                responseJson = r.json()
+                self.__logger.debug(f'Successful get Data from APIC: {responseJson}')
+                if responseJson['imdata']:
+                    return_data.extend(responseJson['imdata'])
+                else:
+                    return return_data
+    
     # ==============================================================================
     # postJson
     # ==============================================================================

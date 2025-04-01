@@ -167,7 +167,11 @@ class ACI:
         page = 0
 
         while True:
-            parsed_query.extend([('page', page), ('page-size', '50000')])
+            if page == 0:
+                parsed_query.extend([('page-size', '50000'), ('page', page)])
+            else:
+                parsed_query[-1] = ('page', page)
+                
             page += 1
             url_to_call = urlunparse((parsed_url[0], parsed_url[1], parsed_url[2], parsed_url[3],
                                       urlencode(parsed_query), parsed_url[5]))
