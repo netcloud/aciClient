@@ -87,8 +87,8 @@ class ACICert:
 
             page += 1
             url_to_call = urlunparse((parsed_url[0], parsed_url[1], parsed_url[2], parsed_url[3],
-                                      urlencode(parsed_query), parsed_url[5]))
-            content = f'GET{parsed_url[2]}?{urlencode(parsed_query)}'
+                                      urlencode(parsed_query, safe="|"), parsed_url[5]))
+            content = f'GET{parsed_url[2]}?{urlencode(parsed_query, safe="|")}'
             cookies = self.packCookies(content)
             r = requests.get(url_to_call, cookies=cookies, verify=False)
 
