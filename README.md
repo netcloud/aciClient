@@ -107,6 +107,17 @@ You can specify a tenant in variable ```target_dn``` or not provide any to do a 
 aci.snapshot(description='test', target_dn='/uni/tn-test')
 ```
 
+### Subscriptions
+You can subscribe to an ACI object with websocket and get near-instant updates on-change.  
+To use the subscriptions you have to:
+- Login to ACI
+- Open websocket to ACI
+- Subscribe to an ACI object via aciClient.subscribe
+- Refresh subscription to an ACI object via aciClient.subscription_refresh
+- Handle messages sent from ACI through websocket 
+
+You can find example code here: examples/subscription.py
+
 ## Testing
 
 ```

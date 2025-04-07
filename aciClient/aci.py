@@ -12,6 +12,9 @@ import json
 import requests
 import threading
 
+import urllib3
+from requests.adapters import HTTPAdapter
+
 # The modules are named different in python2/python3...
 try:
     from urlparse import urlparse, urlunparse, parse_qsl
@@ -44,6 +47,9 @@ class ACI:
         self.refresh_offset = 30
         self.session = None
         self.token = None
+        # See https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html
+        self.total_retry_attempts = 5
+        self.retry_backoff_factor = 10  # in seconds; multiplied by previous attempts.
 
     def __refresh_session_timer(self, response):
         self.__logger.debug(f'refreshing the token {self.refresh_offset}s before it expires')
@@ -58,7 +64,16 @@ class ACI:
     def login(self) -> bool:
         self.__logger.debug('login called')
 
+        retry_strategy = urllib3.Retry(
+            total=self.total_retry_attempts,
+            backoff_factor=self.retry_backoff_factor,
+            status_forcelist=[429, 500, 502, 503, 504],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+
         self.session = requests.Session()
+        self.session.mount('http://', adapter)
+        self.session.mount('https://', adapter)
         self.__logger.debug('Session Object Created')
 
         if self.proxies is not None:
@@ -256,3 +271,56 @@ class ACI:
         else:
             self.__logger.error(f'snapshot creation not succesfull: {response}')
             return False
+
+# ==============================================================================
+    # subscribe
+    # ==============================================================================
+    def subscribe(
+        self, subscription_dn: str, timeout: int = 60, query_parameters: list = []
+    ) -> {}:
+        query_parameters.append("subscription=yes")
+        query_parameters.append(f"refresh-timeout={timeout}")
+
+        endpoint = f"{self.baseUrl}{str(subscription_dn)}?{'&'.join(query_parameters)}"
+        self.__logger.debug(f"Subscribe to: {endpoint}")
+
+        response = self.session.get(endpoint, verify=False)
+        if response.status_code == 200:
+            self.__logger.debug(f"Successful subscribed to APIC: {response.json()}")
+            return response.json()
+        elif response.status_code == 400:
+            resp_text = (
+                f"400: {response.json()['imdata'][0]['error']['attributes']['text']}"
+            )
+            self.__logger.error(f"Error 400 during get occured: {resp_text}")
+            return response.json()
+        else:
+            self.__logger.error(f"Error during get occured: {response.json()}")
+            response.raise_for_status()
+            return response.json()
+
+    # ==============================================================================
+    # subscription_refresh
+    # ==============================================================================
+    def subscription_refresh(self, subscription_id: str) -> {}:
+        query_parameters = [f"id={subscription_id}"]
+
+        endpoint = (
+            f"{self.baseUrl}/subscriptionRefresh.json?{'&'.join(query_parameters)}"
+        )
+        self.__logger.debug(f"Refresh subscription: {subscription_id}")
+
+        response = self.session.post(endpoint, verify=False)
+        if response.status_code == 200:
+            self.__logger.debug(f"Successful subscribed to APIC: {response.json()}")
+            return response.json()
+        elif response.status_code == 400:
+            resp_text = (
+                f"400: {response.json()['imdata'][0]['error']['attributes']['text']}"
+            )
+            self.__logger.error(f"Error 400 during get occured: {resp_text}")
+            return response.json()
+        else:
+            self.__logger.error(f"Error during get occured: {response.json()}")
+            response.raise_for_status()
+            return response.json()
