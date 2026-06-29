@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aciClient"
-version = "1.8"
+version = "1.9.0"
 description = "ACI communication helper class"
 readme = "README.md"
 requires-python = ">=3.10"
