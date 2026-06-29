@@ -37,7 +37,7 @@ Releases are done from the upstream repository:
 2. The upstream CI workflow runs tests and lint checks for the pull request.
 3. After review, the pull request is merged into `netcloud/aciClient`.
 4. When maintainers want to publish a release, they update the version in `pyproject.toml` if needed.
-5. Maintainers create a version tag such as `v1.8` in `netcloud/aciClient`.
+5. Maintainers create a version tag such as `v1.9.0` in `netcloud/aciClient`.
 6. The upstream publish workflow builds the package with `uv build` and publishes it to PyPI.
 
 Publishing requires PyPI trusted publishing to be configured for `netcloud/aciClient`.

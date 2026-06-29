@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aciClient"
-version = "1.8"
+version = "1.9.0"
 description = "ACI communication helper class"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,7 +36,7 @@ Issues = "https://github.com/netcloud/aciClient/issues"
 dev = [
   "pytest>=9.0.2,<10",
   "requests-mock>=1.12.1,<2",
-  "ruff>=0.13.0,<0.14",
+  "ruff>=0.13.0,<0.16",
 ]
 
 [tool.setuptools]
