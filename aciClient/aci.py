@@ -7,22 +7,17 @@
 
 AciClient for doing Username/Password based RestCalls to the APIC
 """
-import logging
+
 import json
-import requests
+import logging
 import threading
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-import urllib3
+import requests
 from requests.adapters import HTTPAdapter
+from requests.packages import urllib3
 
-# The modules are named different in python2/python3...
-try:
-    from urlparse import urlparse, urlunparse, parse_qsl
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
-
-requests.packages.urllib3.disable_warnings()
+from .deprecations import warn_legacy_api
 
 
 class ACI:
@@ -31,7 +26,25 @@ class ACI:
     # ==============================================================================
     # constructor
     # ==============================================================================
-    def __init__(self, apicIp, apicUser, apicPasword, refresh=False, proxies=None):
+    def __init__(
+        self,
+        apicIp,
+        apicUser,
+        apicPasword,
+        refresh=False,
+        proxies=None,
+        *,
+        allow_legacy=True,
+    ):
+        # !! Important !!
+        # ACI will start showing a deprecation warning starting with version 2.0.0
+        # With version 2.1.0, targeted release 10/2027, default of allow_legacy will be changed to False
+        # Creating a Instance of ACI will then throw an Exception except you pass allow_legacy=True
+        # With version 3.0.0 ACI will be completly removed
+        if allow_legacy:
+            warn_legacy_api(old="ACI", replacement="AciClient with PasswordAuth")
+        else:
+            raise RuntimeError("legacy API use is disabled")
         self.__logger.debug("Constructor called")
         self.apicIp = apicIp
         self.apicUser = apicUser
