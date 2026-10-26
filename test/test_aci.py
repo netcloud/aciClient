@@ -4,6 +4,7 @@
 # Copyright (c) 2020 Netcloud AG
 
 """AciClient Testing"""
+
 from requests import RequestException
 
 from aciClient.aci import ACI
