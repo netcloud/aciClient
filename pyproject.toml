@@ -4,24 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aciClient"
-version = "1.8"
+version = "2.0.0"
 description = "ACI communication helper class"
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "MIT" }
+requires-python = ">=3.12"
+license = "MIT"
 authors = [
   { name = "Netcloud AG", email = "nc_dev@netcloud.ch" },
 ]
 dependencies = [
-  "pyOpenSSL>=26.0.0,<27",
+  "certifi>=2026.10.19",
+  "cryptography>=50.0.2,<51",
+  "httpx[socks]>=0.27,<1",
+  "pyOpenSSL>=26.4.0,<27",
   "requests[socks]>=2.33.1,<3",
+  "urllib3>=2.8.0,<3",
 ]
 classifiers = [
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
@@ -31,6 +32,7 @@ classifiers = [
 Homepage = "https://github.com/netcloud/aciClient"
 Repository = "https://github.com/netcloud/aciClient"
 Issues = "https://github.com/netcloud/aciClient/issues"
+Documentation = "https://github.com/netcloud/aciClient/blob/master/README.md"
 
 [dependency-groups]
 dev = [
@@ -42,8 +44,11 @@ dev = [
 [tool.setuptools]
 packages = ["aciClient"]
 
+[tool.setuptools.package-data]
+aciClient = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["test"]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"

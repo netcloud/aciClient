@@ -10,11 +10,15 @@ AciClient for doing Cert based RestCalls to the APIC
 NOTES:
 openssl req -new -newkey rsa:2048 -days 36500 -nodes -x509 -keyout apicUser.key -out apicUser.crt
 """
-import logging
-from OpenSSL import crypto
+
 import base64
-import requests
 import json
+import logging
+
+import requests
+from OpenSSL import crypto
+
+from .deprecations import warn_legacy_api
 
 
 class ACICert:
@@ -23,7 +27,16 @@ class ACICert:
     # ==============================================================================
     # constructor
     # ==============================================================================
-    def __init__(self, apicIp, pkPath, certDn):
+    def __init__(self, apicIp, pkPath, certDn, *, allow_legacy=True):
+        # !! Important !!
+        # ACICert will start showing a deprecation warning starting with version 2.0.0
+        # With version 2.1.0, targeted release 10/2027, default of allow_legacy will be changed to False
+        # Creating a Instance of ACICert will then throw an Exception except you pass allow_legacy=True
+        # With version 3.0.0 ACICert will be completly removed
+        if allow_legacy:
+            warn_legacy_api(old="ACICert", replacement="AciClient with CertificateAuth")
+        else:
+            raise RuntimeError("legacy API use is disabled")
         self.__logger.debug(f"Constructor called {apicIp} {pkPath} {certDn}")
         self.apicIp = apicIp
         self.baseUrl = "https://" + self.apicIp + "/api/"
